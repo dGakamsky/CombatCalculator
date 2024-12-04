@@ -1,0 +1,4 @@
+Empire
+Empire State Trooper (Sword), WS3, S3, T3, I3, A1, W1, 5+, 0, N/A
+Empire State Trooper (Halberd), WS3, S4, T3, I3, A1, W1, 6+, -1, AB(1)
+Empire State Trooper (Spear), WS3, S3, T3, I3, A1, W1, 5+, 0, FIER
