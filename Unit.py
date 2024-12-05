@@ -1,5 +1,5 @@
 class Unit:
-    def __init__(self, name, ws, strength, toughness, initiative, wounds, attacks, leadership, save):
+    def __init__(self, name, ws, strength, toughness, initiative, wounds, attacks, leadership, armor, ward, regen):
         self.name = name
         self.ws = ws
         self.strength = strength
@@ -8,4 +8,6 @@ class Unit:
         self.wounds = wounds
         self.attacks = attacks
         self.leadership = leadership
-        self.save = save
+        self.armor = armor
+        self.ward = ward
+        self.regen = regen

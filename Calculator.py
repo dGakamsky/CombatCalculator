@@ -29,7 +29,9 @@ def CalculateWounds(attacker, defender):
         print(unsavedWounds, "wounds caused")
         return (unsavedWounds)
 
+#currently only does base strength vs toughness
 def MathsToWound(attacker, defender, hits):
+        
         strength = attacker.strength
         print("attacker S is: ", strength)
         toughness = defender.toughness
@@ -50,13 +52,23 @@ def MathsToWound(attacker, defender, hits):
         wounds = hits * toWound
         return (wounds)
 
+# currently only does armor saves
 def MathsToSave(attacker, defender, wounds):
+    wounds_after_armor = ArmorSave(attacker, defender, wounds)
+    wounds_after_ward = WardSave(attacker, defender, wounds_after_armor)
+    wounds_after_regen = RegenSave(attacker, defender, wounds_after_armor)
+    return (wounds_after_regen)
+
+def ArmorSave(attacker, defender, wounds):
         # placeholder for implementation of Ap
         modifiers = 0
-        save = defender.save + modifiers
+        save = defender.armor + modifiers
+        #if the AP negates a save entirely
         if (save >= 7 ):
             toSave = 0/6
         else:
+            #if not for case(1) save could be "7-(save)/6"
+            #matches save value to necessary result
             match save:
                     case 6:
                         toSave = 1/6
@@ -70,33 +82,116 @@ def MathsToSave(attacker, defender, wounds):
                         toSave = 5/6
                     case 1:
                         toSave = 5/6
-        print(save,"+ to save")
+            print(save,"+ to save via armor")
         saved = wounds * toSave
         unsaved = wounds - saved
         return (unsaved)
 
+def WardSave(attacker, defender, wounds):
+        # placeholder for implementation of Ap
+        modifiers = 0
+        save = defender.ward + modifiers
+        if (save >= 7 ):
+            toSave = 0/6
+        else:
+            #if not for case(1) save could be "7-(save)/6"
+            #matches save value to necessary result
+            match save:
+                    case 6:
+                        toSave = 1/6
+                    case 5:
+                        toSave = 2/6
+                    case 4:
+                        toSave = 3/6
+                    case 3:
+                        toSave = 2/6
+                    case 2:
+                        toSave = 5/6
+                    case 1:
+                        toSave = 5/6
+            print(save,"+ to save via ward")
+        saved = wounds * toSave
+        unsaved = wounds - saved
+        return (unsaved)
+
+def RegenSave(attacker, defender, wounds):
+        # placeholder for implementation of Ap
+        modifiers = 0
+        save = defender.regen + modifiers
+        #if the AP negates a save entirely
+        if (save >= 7 ):
+            toSave = 0/6
+        else:
+            #if not for case(1) save could be "7-(save)/6"
+            #matches save value to necessary result
+            match save:
+                    case 6:
+                        toSave = 1/6
+                    case 5:
+                        toSave = 2/6
+                    case 4:
+                        toSave = 3/6
+                    case 3:
+                        toSave = 2/6
+                    case 2:
+                        toSave = 5/6
+                    case 1:
+                        toSave = 5/6
+            print(save,"+ to save via regeneration")
+        saved = wounds * toSave
+        unsaved = wounds - saved
+        return (unsaved)
+
+     #TODO factor in mounts/multiple combatants (likely its own method, later)
+     #TODO factor in combat rounds, since some rules depend on it
+     #TODO determine winner via generated combat resolution 
+     #TODO impact hits/stomps, charging
+
 #basic "container" function, loops combat between units until one dies, then announces winner
+#currently only works for 1v1
 def Combat(unit1, unit2):
      print (unit2.name, " has ", unit2.wounds, "wounds remaining")
-     print (unit1.name, " has ", unit1.wounds, "wounds remaining")  
+     print (unit1.name, " has ", unit1.wounds, "wounds remaining") 
+
+     #does the initiative steps
+    
+     init1 = unit1.initiative
+     init2 = unit1.initiative
+     #defauls to 3 for now, will be set to a dynamic variable later (such as for rear charges)
+     charge_bonus = 3
+     round = 1
+     #combat only occurs while both parties are alive
      while (unit1.wounds > 0 and unit2.wounds > 0):
-            if (unit1.initiative > unit2.initiative):
+        #unit 1 is assumed to charge
+
+            if (round == 1):
+                    init1 += charge_bonus
+            else:
+                    init1 = unit1.initiative
+
+            if (init1 > init2):
                     unit2.wounds = unit2.wounds - CalculateWounds(unit1, unit2)
                     print (unit2.name, " has ", unit2.wounds, "wounds remaining")
                     if (unit2.wounds >0):
                        unit1.wounds = unit1.wounds - CalculateWounds(unit2, unit1)
-                       print (unit1.name, " has ", unit1.wounds, "wounds remaining")  
-            elif(unit2.initiative > unit1.initiative):
+                       print (unit1.name, " has ", unit1.wounds, "wounds remaining") 
+                    round+=1  
+            elif(init2 > init1):
                     unit1.wounds = unit1.wounds - CalculateWounds(unit2, unit1)
                     print (unit1.name, " has ", unit1.wounds, "wounds remaining") 
                     if (unit1.wounds >0):
                        unit2.wounds = unit2.wounds - CalculateWounds(unit1, unit2)
-                       print (unit2.name, " has ", unit2.wounds, "wounds remaining")  
+                       print (unit2.name, " has ", unit2.wounds, "wounds remaining") 
+                    round+=1 
+ 
             else:
                 unit2.wounds = unit2.wounds - CalculateWounds(unit1, unit2)
                 print (unit2.name, " has ", unit2.wounds, "wounds remaining")
                 unit1.wounds = unit1.wounds - CalculateWounds(unit2, unit1)   
-                print (unit1.name, " has ", unit1.wounds, "wounds remaining")    
+                print (unit1.name, " has ", unit1.wounds, "wounds remaining")   
+                round+=1 
+
+
      if (unit1.wounds > 0 and unit2.wounds <=0):
           winner = unit1.name
      elif(unit1.wounds > 0 and unit2.wounds <=0):
@@ -108,8 +203,8 @@ def Combat(unit1, unit2):
 
 #container function for testing
 def runtest():
-     Unit1 = Unit.Unit("Unit1", 3, 3, 3, 3, 1, 2, 7, 5)
-     Unit2 = Unit.Unit("Unit2", 4, 3, 4, 3, 1, 1, 7, 5)  
+     Unit1 = Unit.Unit("Unit1", 3, 3, 3, 3, 1, 2, 7, 5, 7, 7)
+     Unit2 = Unit.Unit("Unit2", 4, 3, 4, 3, 1, 1, 7, 5, 7, 7)  
      Combat(Unit1, Unit2)
 
 runtest()
