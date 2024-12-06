@@ -1,4 +1,8 @@
 import Unit
+import tkinter as tk
+from tkinter import *
+from tkinter.simpledialog import askstring
+from tkinter import ttk
 
 def CalculateHits(attacker, defender):
         hits = attacker.attacks * MathsToHit(attacker, defender)
@@ -54,9 +58,10 @@ def MathsToWound(attacker, defender, hits):
 
 # currently only does armor saves
 def MathsToSave(attacker, defender, wounds):
+    #saves stack and are done one after the other
     wounds_after_armor = ArmorSave(attacker, defender, wounds)
     wounds_after_ward = WardSave(attacker, defender, wounds_after_armor)
-    wounds_after_regen = RegenSave(attacker, defender, wounds_after_armor)
+    wounds_after_regen = RegenSave(attacker, defender, wounds_after_ward)
     return (wounds_after_regen)
 
 def ArmorSave(attacker, defender, wounds):
@@ -207,4 +212,20 @@ def runtest():
      Unit2 = Unit.Unit("Unit2", 4, 3, 4, 3, 1, 1, 7, 5, 7, 7)  
      Combat(Unit1, Unit2)
 
+
 runtest()
+
+#GUI section
+class UI(tk.Tk):
+    def __init__(self):
+        super().__init__()
+
+root = UI()
+root.title("Combat calculator")
+root.geometry("1000x1000")
+frame = ttk.Frame(root, borderwidth=2, relief="sunken")
+frame.grid(column=0, row=0, sticky=(N,W,E,  S))
+root.columnconfigure(0, weight=1)
+root.rowconfigure(0, weight=1)
+
+root.mainloop()
