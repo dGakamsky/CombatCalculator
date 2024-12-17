@@ -3,6 +3,8 @@ import tkinter as tk
 from tkinter import *
 from tkinter.simpledialog import askstring
 from tkinter import ttk
+import sys
+from tkinter import *
 
 def CalculateHits(attacker, defender):
         hits = attacker.attacks * MathsToHit(attacker, defender)
@@ -207,25 +209,51 @@ def Combat(unit1, unit2):
 
 
 #container function for testing
-def runtest():
+def runtest(self):
      Unit1 = Unit.Unit("Unit1", 3, 3, 3, 3, 1, 2, 7, 5, 7, 7)
      Unit2 = Unit.Unit("Unit2", 4, 3, 4, 3, 1, 1, 7, 5, 7, 7)  
      Combat(Unit1, Unit2)
 
 
-runtest()
+
 
 #GUI section
-class UI(tk.Tk):
-    def __init__(self):
-        super().__init__()
+window=tk.Tk()
 
-root = UI()
-root.title("Combat calculator")
-root.geometry("1000x1000")
-frame = ttk.Frame(root, borderwidth=2, relief="sunken")
-frame.grid(column=0, row=0, sticky=(N,W,E,  S))
-root.columnconfigure(0, weight=1)
-root.rowconfigure(0, weight=1)
+window.title('Calculator')
+window.geometry("1000x1000")
 
-root.mainloop()
+#frames for temp unit entry
+frame1 = Frame(window, bg= "red")
+frame1.pack(side = LEFT)
+frame2 = Frame(window, bg= "blue")
+frame2.pack(side = LEFT)
+
+#frame for output
+frame3 = Frame(window, bg="grey")
+frame3.pack(side = LEFT)
+
+#frame for control buttons
+frame4 = Frame(window)
+frame4.pack(side = BOTTOM)
+
+btn=Button(frame4, text="run combat")
+btn.bind('<Button-1>', runtest)
+btn.place(relx=50, rely=50)
+btn.pack()
+
+#where the combat log will be printed
+output_text = tk.Text(frame3, bg="black", fg="white", height=70, width=40)
+output_text.pack()
+
+#prints the combat log to an output in the UI
+def print_to_text_widget(*args, **kwargs):
+    text = " ".join(map(str, args)) + "\n"
+    output_text.insert(tk.END, text)
+    output_text.see(tk.END) 
+
+#redirects printing to the UI
+sys.stdout.write = print_to_text_widget
+
+
+window.mainloop()
