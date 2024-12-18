@@ -283,7 +283,7 @@ frame2.pack(side = LEFT)
 #selector 2
 clicked2 = StringVar() 
 clicked2.set(unit_names[0]) 
-drop = OptionMenu(frame2, clicked , *unit_names ) 
+drop = OptionMenu(frame2, clicked2 , *unit_names ) 
 drop.pack() 
 label2 = Label(frame2 , text = " " )
 label2.pack()
