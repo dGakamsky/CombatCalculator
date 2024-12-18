@@ -6,6 +6,8 @@ from tkinter import ttk
 import sys
 from tkinter import *
 
+
+
 def CalculateHits(attacker, defender):
         hits = attacker.attacks * MathsToHit(attacker, defender)
         print(hits, "hits caused")
@@ -156,14 +158,20 @@ def RegenSave(attacker, defender, wounds):
 
 #basic "container" function, loops combat between units until one dies, then announces winner
 #currently only works for 1v1
-def Combat(unit1, unit2):
+def Combat(unit1, unit2, charger):
      print (unit2.name, " has ", unit2.wounds, "wounds remaining")
      print (unit1.name, " has ", unit1.wounds, "wounds remaining") 
 
      #does the initiative steps
+
+     charging_unit = charger
+     if charger == unit1:
+        defending_unit = unit2
+     else:
+        defending_unit = unit1
     
-     init1 = unit1.initiative
-     init2 = unit1.initiative
+     init1 = charging_unit.initiative
+     init2 = defending_unit.initiative
      #defauls to 3 for now, will be set to a dynamic variable later (such as for rear charges)
      charge_bonus = 3
      round = 1
@@ -208,11 +216,7 @@ def Combat(unit1, unit2):
      print("winner is:", winner)
 
 
-#container function for testing
-def runtest(self):
-     Unit1 = Unit.Unit("Unit1", 3, 3, 3, 3, 1, 2, 7, 5, 7, 7)
-     Unit2 = Unit.Unit("Unit2", 4, 3, 4, 3, 1, 1, 7, 5, 7, 7)  
-     Combat(Unit1, Unit2)
+
 
 
 
@@ -221,26 +225,91 @@ def runtest(self):
 window=tk.Tk()
 
 window.title('Calculator')
-window.geometry("1000x1000")
+window.geometry("1000x1100")
+
+#container for central features
+overframe = Frame(window)
+overframe.pack(side = TOP)
+
+
 
 #frames for temp unit entry
-frame1 = Frame(window, bg= "red")
+
+
+#list of units, to be replaced with a generated list eventually
+Unit1 = Unit.Unit("Unit1", 3, 3, 3, 3, 1, 2, 7, 5, 7, 7)
+Unit2 = Unit.Unit("Unit2", 4, 3, 4, 3, 1, 1, 7, 5, 7, 7) 
+Unit3 = Unit.Unit("Unit3", 7, 3, 2, 3, 1, 1, 7, 5, 7, 7)   
+units = [Unit1, Unit2, Unit3]
+#creates a list of unit names which maps onto the list of units
+unit_names = []
+for unit in units:
+    unit_names.append(unit.name)
+#since the list of unit names maps onto the list of units, this allows for the selection of a unit from the list of unit names
+
+def unit_1_select(self):
+    chosen_unit = units[unit_names.index(clicked.get())]
+    label1.config( text = chosen_unit.name) 
+    print(chosen_unit.name)
+    global selected_unit_1
+    selected_unit_1 = chosen_unit
+
+def unit_2_select(self):
+    chosen_unit = units[unit_names.index(clicked2.get())]
+    label2.config( text = chosen_unit.name) 
+    print(chosen_unit.name)
+    global selected_unit_2 
+    selected_unit_2 = chosen_unit
+
+
+#Frame1
+frame1 = Frame(overframe, bg= "red", borderwidth=30, padx=10, pady=10)
 frame1.pack(side = LEFT)
-frame2 = Frame(window, bg= "blue")
+#selector 1
+clicked = StringVar() 
+clicked.set(unit_names[0]) 
+drop = OptionMenu(frame1, clicked , *unit_names ) 
+drop.pack()
+label1 = Label(frame1 , text = " " )
+label1.pack()
+button = Button(frame1 , text = "Select unit 1")
+button.pack()  
+button.bind('<Button-1>', unit_1_select)
+
+#Frame2
+frame2 = Frame(overframe, bg= "blue", borderwidth=30, padx=10, pady=10)
 frame2.pack(side = LEFT)
 
+#selector 2
+clicked2 = StringVar() 
+clicked2.set(unit_names[0]) 
+drop = OptionMenu(frame2, clicked , *unit_names ) 
+drop.pack() 
+label2 = Label(frame2 , text = " " )
+label2.pack()
+button2 = Button(frame2 , text = "Select unit 2" )
+button2.pack() 
+button2.bind('<Button-1>', unit_2_select)
+
+
 #frame for output
-frame3 = Frame(window, bg="grey")
+frame3 = Frame(overframe, bg="grey", borderwidth=30, padx=10, pady=10)
 frame3.pack(side = LEFT)
 
 #frame for control buttons
 frame4 = Frame(window)
 frame4.pack(side = BOTTOM)
 
-btn=Button(frame4, text="run combat")
-btn.bind('<Button-1>', runtest)
-btn.place(relx=50, rely=50)
-btn.pack()
+
+#container function for testing
+def runtest(self):
+     Combat(selected_unit_1, selected_unit_2, Unit1)
+
+#button to run combat
+cbtn=Button(frame4, text="run combat")
+cbtn.bind('<Button-1>', runtest)
+cbtn.place(relx=50, rely=50)
+cbtn.pack()
 
 #where the combat log will be printed
 output_text = tk.Text(frame3, bg="black", fg="white", height=70, width=40)
@@ -248,12 +317,14 @@ output_text.pack()
 
 #prints the combat log to an output in the UI
 def print_to_text_widget(*args, **kwargs):
-    text = " ".join(map(str, args)) + "\n"
+    text = " ".join(map(str, args)) #+ "\n"
     output_text.insert(tk.END, text)
     output_text.see(tk.END) 
 
 #redirects printing to the UI
 sys.stdout.write = print_to_text_widget
+
+
 
 
 window.mainloop()
