@@ -209,11 +209,13 @@ def Combat(unit1, unit2, charger):
 
      if (unit1.wounds > 0 and unit2.wounds <=0):
           winner = unit1.name
-     elif(unit1.wounds > 0 and unit2.wounds <=0):
+     elif(unit2.wounds > 0 and unit1.wounds <=0):
           winner = unit2.name
      else:
-          winner = "DRAW"
+          winner = "TIED COMBAT"
      print("winner is:", winner)
+     print("unit 1 has:", unit1.wounds, "wounds left")
+     print("unit 2 has:", unit2.wounds, "wounds left")
 
 
 
@@ -231,14 +233,17 @@ window.geometry("1000x1100")
 overframe = Frame(window)
 overframe.pack(side = TOP)
 
-
+#checks whether theres selected units for combat, defaults to false as nothing is selected on init
+unit_1_selected=FALSE
+unit_2_selected=FALSE
+charger = IntVar()
 
 #frames for temp unit entry
 
 
 #list of units, to be replaced with a generated list eventually
 Unit1 = Unit.Unit("Unit1", 3, 3, 3, 3, 1, 2, 7, 5, 7, 7)
-Unit2 = Unit.Unit("Unit2", 4, 3, 4, 3, 1, 1, 7, 5, 7, 7) 
+Unit2 = Unit.Unit("Unit2", 4, 3, 6, 6, 1, 3, 7, 5, 7, 7) 
 Unit3 = Unit.Unit("Unit3", 7, 3, 2, 3, 1, 1, 7, 5, 7, 7)   
 units = [Unit1, Unit2, Unit3]
 #creates a list of unit names which maps onto the list of units
@@ -250,16 +255,20 @@ for unit in units:
 def unit_1_select(self):
     chosen_unit = units[unit_names.index(clicked.get())]
     label1.config( text = chosen_unit.name) 
-    print(chosen_unit.name)
+    print(chosen_unit.name, "selected as the first unit")
     global selected_unit_1
     selected_unit_1 = chosen_unit
+    global unit_1_selected
+    unit_1_selected = TRUE
 
 def unit_2_select(self):
     chosen_unit = units[unit_names.index(clicked2.get())]
     label2.config( text = chosen_unit.name) 
-    print(chosen_unit.name)
+    print(chosen_unit.name, "selected as the second unit")
     global selected_unit_2 
     selected_unit_2 = chosen_unit
+    global unit_2_selected
+    unit_2_selected = TRUE
 
 
 #Frame1
@@ -292,6 +301,12 @@ button2.pack()
 button2.bind('<Button-1>', unit_2_select)
 
 
+#selects the charging unit
+charger_select_button1 = Radiobutton(frame1, text="select as charger", variable=charger, value=1, command="sel")
+charger_select_button1.pack()
+charger_select_button2 = Radiobutton(frame2, text="select as charger", variable=charger, value=2, command="sel")
+charger_select_button2.pack()
+
 #frame for output
 frame3 = Frame(overframe, bg="grey", borderwidth=30, padx=10, pady=10)
 frame3.pack(side = LEFT)
@@ -303,7 +318,23 @@ frame4.pack(side = BOTTOM)
 
 #container function for testing
 def runtest(self):
-     Combat(selected_unit_1, selected_unit_2, Unit1)
+     if (unit_1_selected & unit_2_selected):
+        match charger.get():
+             case 1:
+                print("combat between:" ,selected_unit_1.name, "and", selected_unit_2.name)
+                print("the charger is:", selected_unit_1.name )
+                Combat(selected_unit_1, selected_unit_2, selected_unit_1)
+             case 2:
+                print("combat between:" ,selected_unit_1.name, "and", selected_unit_2.name)
+                print("the charger is:", selected_unit_2.name)
+                Combat(selected_unit_1, selected_unit_2, selected_unit_2)
+             case _:
+                print("please select the charger")
+                  
+     else:
+        print("please select two units")
+        
+
 
 #button to run combat
 cbtn=Button(frame4, text="run combat")
