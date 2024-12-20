@@ -159,8 +159,8 @@ def RegenSave(attacker, defender, wounds):
 #basic "container" function, loops combat between units until one dies, then announces winner
 #currently only works for 1v1
 def Combat(unit1, unit2, charger):
-     print (unit2.name, " has ", unit2.wounds, "wounds remaining")
-     print (unit1.name, " has ", unit1.wounds, "wounds remaining") 
+     print (unit2.name, " has ", unit2.maxwounds, "wounds remaining")
+     print (unit1.name, " has ", unit1.maxwounds, "wounds remaining") 
 
      #does the initiative steps
 
@@ -176,7 +176,7 @@ def Combat(unit1, unit2, charger):
      charge_bonus = 3
      round = 1
      #combat only occurs while both parties are alive
-     while (unit1.wounds > 0 and unit2.wounds > 0):
+     while (unit1.currentwounds > 0 and unit2.currentwounds > 0):
         #unit 1 is assumed to charge
 
             if (round == 1):
@@ -185,40 +185,46 @@ def Combat(unit1, unit2, charger):
                     init1 = unit1.initiative
 
             if (init1 > init2):
-                    unit2.wounds = unit2.wounds - CalculateWounds(unit1, unit2)
-                    print (unit2.name, " has ", unit2.wounds, "wounds remaining")
-                    if (unit2.wounds >0):
-                       unit1.wounds = unit1.wounds - CalculateWounds(unit2, unit1)
-                       print (unit1.name, " has ", unit1.wounds, "wounds remaining") 
+                    unit2.currentwounds = unit2.currentwounds - CalculateWounds(unit1, unit2)
+                    print (unit2.name, " has ", unit2.currentwounds, "wounds remaining")
+                    if (unit2.currentwounds >0):
+                       unit1.currentwounds = unit1.currentwounds - CalculateWounds(unit2, unit1)
+                       print (unit1.name, " has ", unit1.currentwounds, "wounds remaining") 
                     round+=1  
             elif(init2 > init1):
-                    unit1.wounds = unit1.wounds - CalculateWounds(unit2, unit1)
-                    print (unit1.name, " has ", unit1.wounds, "wounds remaining") 
-                    if (unit1.wounds >0):
-                       unit2.wounds = unit2.wounds - CalculateWounds(unit1, unit2)
-                       print (unit2.name, " has ", unit2.wounds, "wounds remaining") 
+                    unit1.currentwounds = unit1.currentwounds - CalculateWounds(unit2, unit1)
+                    print (unit1.name, " has ", unit1.currentwounds, "wounds remaining") 
+                    if (unit1.currentwounds >0):
+                       unit2.currentwounds = unit2.currentwounds - CalculateWounds(unit1, unit2)
+                       print (unit2.name, " has ", unit2.currentwounds, "wounds remaining") 
                     round+=1 
  
             else:
-                unit2.wounds = unit2.wounds - CalculateWounds(unit1, unit2)
-                print (unit2.name, " has ", unit2.wounds, "wounds remaining")
-                unit1.wounds = unit1.wounds - CalculateWounds(unit2, unit1)   
-                print (unit1.name, " has ", unit1.wounds, "wounds remaining")   
+                unit2.currentwounds = unit2.currentwounds - CalculateWounds(unit1, unit2)
+                print (unit2.name, " has ", unit2.currentwounds, "wounds remaining")
+                unit1.currentwounds = unit1.currentwounds - CalculateWounds(unit2, unit1)   
+                print (unit1.name, " has ", unit1.currentwounds, "wounds remaining")   
                 round+=1 
 
 
-     if (unit1.wounds > 0 and unit2.wounds <=0):
+     if (unit1.currentwounds > 0 and unit2.currentwounds <=0):
           winner = unit1.name
-     elif(unit2.wounds > 0 and unit1.wounds <=0):
+     elif(unit2.currentwounds > 0 and unit1.currentwounds <=0):
           winner = unit2.name
      else:
           winner = "TIED COMBAT"
      print("winner is:", winner)
-     print("unit 1 has:", unit1.wounds, "wounds left")
-     print("unit 2 has:", unit2.wounds, "wounds left")
+     print(unit1.name, "has:", unit1.currentwounds, "wounds left of", unit1.maxwounds, "starting wounds")
+     print(unit2.name, "has:", unit2.currentwounds, "wounds left of", unit2.maxwounds, "starting wounds")
+     print("the cost efficiency of ", unit1.name, "was ", calculate_efficiency(unit1, unit2))
+     print("the cost efficiency of ", unit2.name, "was ", calculate_efficiency(unit2, unit1))
 
-
-
+#calculates the cost efficiency of the first unit against the second
+def calculate_efficiency(unit1, unit2):
+     #efficiency = points "dealt" (expressed as a fraction of the enemy killed) minus the points "lost" (as a fraction of damage suffered)
+     points_efficiency = (unit2.points * ((unit2.maxwounds - unit2.currentwounds)/unit2.maxwounds)) - (unit1.points * ((unit1.maxwounds -unit2.currentwounds)/unit1.maxwounds))
+     return points_efficiency
+     
 
 
 
@@ -242,9 +248,9 @@ charger = IntVar()
 
 
 #list of units, to be replaced with a generated list eventually
-Unit1 = Unit.Unit("Unit1", 3, 3, 3, 3, 1, 2, 7, 5, 7, 7)
-Unit2 = Unit.Unit("Unit2", 4, 3, 6, 6, 1, 3, 7, 5, 7, 7) 
-Unit3 = Unit.Unit("Unit3", 7, 3, 2, 3, 1, 1, 7, 5, 7, 7)   
+Unit1 = Unit.Unit("Unit1", 3, 3, 3, 3, 1, 2, 7, 5, 7, 7, 8)
+Unit2 = Unit.Unit("Unit2", 4, 3, 6, 6, 1, 3, 7, 5, 7, 7, 60) 
+Unit3 = Unit.Unit("Unit3", 7, 3, 2, 3, 1, 1, 7, 5, 7, 7, 10)   
 units = [Unit1, Unit2, Unit3]
 #creates a list of unit names which maps onto the list of units
 unit_names = []
